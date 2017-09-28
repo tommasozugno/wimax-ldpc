@@ -1,18 +1,35 @@
+%Reference: http://webstaff.itn.liu.se/~eribe/tne066/lab/ldpc_harq/Tutorial%20%96%20the%20sum-product%20algorithm.pdf
 clear all;
 close all; 
 
-Nit = 1;
+%% Encoder
+n = 8; k = 4; %Codeword length and info bits
+H = [1 0 1 0 1 0 1 0 ; 1 0 0 1 0 1 0 1 ; 0 1 1 0 0 1 1 0 ; 0 1 0 1 1 0 0 1]; %Parity check matrix
+G = [eye(k) ; 1 0 0 0 ; 0 1 0 0 ; 0 0 1 0 ; 1 1 0 1]; %Generetor matrix
+u = randi([0,1],[k,1]); %Word
+c = mod(G*u , 2); %Codeword
 
-H = [1 0 1 0 1 0 1 0 ; 1 0 0 1 0 1 0 1 ; 0 1 1 0 0 1 1 0 ; 0 1 0 1 1 0 0 1];
-r = [-2.5467 0.2358 -1.3929 -3.0287 -1.8290 -1.1768 -1.9434 -0.1152];
+%% BPSK
+c_mod = 2*c-1; %Modulate
 
-g = -2*r;
+%% Channel
+SNR_dB = 0;
+SNR = 10^(SNR_dB/10);
+sigmaw = sqrt(1/SNR); %Noise variance
+
+w = randn(size(c_mod)); %AWGN noise
+r = c_mod + w*sigmaw; %Received vector
+%r = [-2.5467 0.2358 -1.3929 -3.0287 -1.8290 -1.1768 -1.9434 -0.1152];
+
+%% Decoder
+Nit = 1; %Number of iterations on the graph
+g = -2*r; %LLR leaf nodes
 
 %initialization
-c_hat = zeros(1,length(r));
-mu_hf = H.';
-mu_fh = H;
-mu_hg = zeros(1,length(g));
+c_hat = zeros(length(r),1); %estimated codeword
+mu_hf = H.'; %messages from variable to check
+mu_fh = H; %messages from check to variable
+mu_hg = zeros(1,length(g)); %messages from variable to leaf
 for i = 1 : size(mu_hf,1)
     mu_hf(i,:) = mu_hf(i,:)*g(i);
 end
@@ -64,10 +81,10 @@ for it = 1 : Nit
             c_hat(i) = 1;
         end
     end
-    c_hat
 end
 
-
+u_hat = c_hat(1:k); %Estimated message
+err = sum(u_hat ~= u);
 
 
 function y = phy_inv(x)
