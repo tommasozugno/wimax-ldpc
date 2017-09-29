@@ -23,7 +23,7 @@ r = c_mod + w*sigmaw; %Received vector
 
 %% Decoder
 Nit = 1; %Number of iterations on the graph
-g = -2*r; %LLR leaf nodes
+g = -2*r/(sigmaw^2); %LLR leaf nodes
 
 %initialization
 c_hat = zeros(length(r),1); %estimated codeword
