@@ -7,7 +7,7 @@ n = 8; k = 4;
 H = [1 0 1 0 1 0 1 0 ; 1 0 0 1 0 1 0 1 ; 0 1 1 0 0 1 1 0 ; 0 1 0 1 1 0 0 1]; %Parity check matrix
 G = [eye(k) ; 1 0 0 0 ; 0 1 0 0 ; 0 0 1 0 ; 1 1 0 1]; %Generetor matrix
 
-Nit = 3; %Number of iterations on the graph
+Nit = 1; %Number of iterations on the graph
 
 %Generate data
 Npck = 10000;
@@ -49,17 +49,17 @@ if(save_results)
 end
 
 %Uncoded BER
-%Pbit_uncoded = qfunc(sqrt(2*SNR));
+Pbit_uncoded = qfunc(sqrt(2*SNR));
 
 % show results
-% figure;
-% set(0,'defaultTextInterpreter','latex') % to use LaTeX format
-% set(gca,'FontSize',14);
-% semilogy(SNR_dB,Pbit,'k-',SNR_dB,Pbit_uncoded,'b--','LineWidth',2)
-% axis([min(SNR_dB) max(SNR_dB) 1e-7 1e0])
-% hleg = legend('Simulation','Theoretical bound');
-% set(hleg,'position',[0.15 0.13 0.32 0.15]);
-% xlabel('$E_b/N_0$  [dB]')
-% ylabel('BER $P_{\rm bit}$')
-% set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on',...
-%         'YGrid', 'on', 'XGrid', 'on');
+figure;
+set(0,'defaultTextInterpreter','latex') % to use LaTeX format
+set(gca,'FontSize',14);
+semilogy(SNR_dB,Pbit,'k-',SNR_dB,Pbit_uncoded,'b--','LineWidth',2)
+axis([min(SNR_dB) max(SNR_dB) 1e-7 1e0])
+hleg = legend('Simulation','Uncoded BER');
+set(hleg,'position',[0.15 0.13 0.32 0.15]);
+xlabel('$E_b/N_0$  [dB]')
+ylabel('BER $P_{\rm bit}$')
+set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on',...
+        'YGrid', 'on', 'XGrid', 'on');

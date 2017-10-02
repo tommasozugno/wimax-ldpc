@@ -70,7 +70,7 @@ for it = 1 : Nit
     end
 
     for i = 1 : length(g)
-        mu_hg(i) = sum(mu_hf(i,:));
+        mu_hg(i) = sum(mu_fh(:,i)); %%%%%%%
     end
 
     %marginalization
