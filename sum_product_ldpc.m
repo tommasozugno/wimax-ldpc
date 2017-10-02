@@ -22,7 +22,7 @@ r = c_mod + w*sigmaw; %Received vector
 %r = [-2.5467 0.2358 -1.3929 -3.0287 -1.8290 -1.1768 -1.9434 -0.1152];
 
 %% Decoder
-Nit = 1; %Number of iterations on the graph
+Nit = 20; %Number of iterations on the graph
 g = -2*r/(sigmaw^2); %LLR leaf nodes
 
 %initialization
@@ -34,7 +34,8 @@ for i = 1 : size(mu_hf,1)
     mu_hf(i,:) = mu_hf(i,:)*g(i);
 end
 
-for it = 1 : Nit
+it = 0; stopp = 0;
+while(it < Nit && stopp == 0)
     %check nodes update
     for i = 1 : size(mu_fh,1)
         for j = 1 : size(mu_fh,2)
@@ -70,7 +71,7 @@ for it = 1 : Nit
     end
 
     for i = 1 : length(g)
-        mu_hg(i) = sum(mu_fh(:,i)); %%%%%%%
+        mu_hg(i) = sum(mu_fh(:,i));
     end
 
     %marginalization
@@ -81,6 +82,12 @@ for it = 1 : Nit
             c_hat(i) = 1;
         end
     end
+    
+    if(sum(mod(H*c_hat,2)) == 0)
+        %stopp = 1;
+    end
+    
+    it = it + 1;
 end
 
 u_hat = c_hat(1:k); %Estimated message

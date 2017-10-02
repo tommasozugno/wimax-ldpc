@@ -4,8 +4,7 @@ close all;
 save_results = 1;
 
 n = 8; k = 4;
-H = [1 0 1 0 1 0 1 0 ; 1 0 0 1 0 1 0 1 ; 0 1 1 0 0 1 1 0 ; 0 1 0 1 1 0 0 1]; %Parity check matrix
-G = [eye(k) ; 1 0 0 0 ; 0 1 0 0 ; 0 0 1 0 ; 1 1 0 1]; %Generetor matrix
+load matrices/test;
 
 Nit = 1; %Number of iterations on the graph
 

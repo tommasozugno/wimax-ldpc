@@ -10,8 +10,9 @@ function u_hat = decode2(r,sigmaw,H,k,Nit)
     for i = 1 : size(mu_hf,1)
         mu_hf(i,:) = mu_hf(i,:)*g(i);
     end
-
-    for it = 1 : Nit
+    
+    it = 0;
+    while(it < Nit)
         %check nodes update
         for i = 1 : size(mu_fh,1)
             for j = 1 : size(mu_fh,2)
@@ -58,6 +59,8 @@ function u_hat = decode2(r,sigmaw,H,k,Nit)
                 c_hat(i) = 1;
             end
         end
+        
+        it = it + 1;
     end
     u_hat = c_hat(1:k);
 end
