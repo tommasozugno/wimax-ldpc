@@ -3,13 +3,12 @@ close all;
 
 save_results = 1;
 
-n = 8; k = 4;
-load matrices/test;
+load matrices/96.33.964.mat
 
-Nit = 1; %Number of iterations on the graph
+Nit = 20; %Number of iterations on the graph
 
 %Generate data
-Npck = 10000;
+Npck = 1000;
 u = randi([0,1],[Npck*k,1]);
 
 %Encode
@@ -22,7 +21,7 @@ end
 c_mod = 2*c-1;
 
 %Channel
-SNR_dB = -2 : 1 : 10;
+SNR_dB = 1 : 1 : 5;
 SNR = 10.^(SNR_dB/10);
 sigmaw = sqrt(1./SNR); %Noise variance
 w = randn(length(c_mod),1);
