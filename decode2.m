@@ -74,5 +74,14 @@ function y = phy_inv(x)
 end
 
 function y = phy_tilde(x)
-    y = -log(phy_inv(x));
+    %y = -log(phy_inv(x));
+    if(x<10^-2)
+        y = 6;
+    else
+        if(x>10)
+            y = 0;
+        else
+            y = -log(phy_inv(x));
+        end
+    end
 end
