@@ -38,7 +38,7 @@ function u_hat = decode2(r,sigmaw,H,k,Nit)
                 if(mu_hf(i,j) ~= 0)
                     tmp1 = 0;
                     for l = 1 : size(mu_fh,1)
-                        if(l ~= i)
+                        if(l ~= j)
                             tmp1 = tmp1 + mu_fh(l,i);
                         end
                     end
