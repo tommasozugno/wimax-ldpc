@@ -14,39 +14,22 @@ function u_hat = decode2(r,sigmaw,H,k,Nit)
     it = 0; stopp = 0;
     while(it < Nit && stopp == 0)
         %check nodes update
-        for i = 1 : size(mu_fh,1)
-            for j = 1 : size(mu_fh,2)
+        tmp1 = arrayfun(@phy_tilde,abs(mu_hf));
+    
+        tmp2 = sum(tmp1,1).';
 
-                if(mu_fh(i,j) ~= 0)
-                    tmp1 = 0; tmp2 = 1;
-                    for l = 1 : size(mu_hf,1)
-                        if(l ~= j && mu_hf(l,i) ~= 0)
-                            tmp1 = tmp1 + phy_tilde(abs(mu_hf(l,i)));
-                            tmp2 = tmp2*sign(mu_hf(l,i));
-                        end
-                    end
-                    mu_fh(i,j) = phy_tilde(tmp1)*tmp2;
-                end
+        tmp3 = (tmp2*ones(1,size(H,2))).*H-tmp1.';
 
-            end
-        end
+        tmp4 = (mu_hf>=0)*2-1;
+
+        tmp5 = prod(tmp4,1).';
+
+        mu_fh = arrayfun(@phy_tilde,tmp3).*(tmp5*ones(1,size(H,2)).*tmp4.');
 
         %variable nodes update
-        for i = 1 : size(mu_hf,1)
-            for j = 1 : size(mu_hf,2)
-
-                if(mu_hf(i,j) ~= 0)
-                    tmp1 = 0;
-                    for l = 1 : size(mu_fh,1)
-                        if(l ~= j)
-                            tmp1 = tmp1 + mu_fh(l,i);
-                        end
-                    end
-                    mu_hf(i,j) = tmp1 + g(i);
-                end
-            end
-        end
-
+        tmp = sum(mu_fh).' + g;
+        mu_hf = (tmp*ones(1,size(H,1))).*(H.') - mu_fh.';
+        
         for i = 1 : length(g)
             mu_hg(i) = sum(mu_fh(:,i));
         end
@@ -69,19 +52,15 @@ function u_hat = decode2(r,sigmaw,H,k,Nit)
     u_hat = c_hat(1:k);
 end
 
-function y = phy_inv(x)
-    y = tanh(0.5*x);
-end
-
 function y = phy_tilde(x)
     %y = -log(phy_inv(x));
-    if(x<10^-2)
-        y = 6;
+    if(x<=0)
+        y = 0;
     else
-        if(x>10)
-            y = 0;
+        if(x<10^-2)
+            y = 6;
         else
-            y = -log(phy_inv(x));
+            y = -log(tanh(0.5*x));
         end
     end
 end
