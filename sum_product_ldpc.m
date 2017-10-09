@@ -13,7 +13,7 @@ c = mod(G*u , 2); %Codeword
 c_mod = 2*c-1; %Modulate
 
 %% Channel
-SNR_dB = 0;
+SNR_dB = 5;
 SNR = 10^(SNR_dB/10);
 sigmaw = sqrt(1/SNR); %Noise variance
 
@@ -22,7 +22,7 @@ r = c_mod + w*sigmaw; %Received vector
 %r = [-2.5467 0.2358 -1.3929 -3.0287 -1.8290 -1.1768 -1.9434 -0.1152].';
 
 %% Decoder
-Nit = 50; %Number of iterations on the graph
+Nit = 1; %Number of iterations on the graph
 g = -2*r/(sigmaw^2); %LLR leaf nodes
 
 %initialization
@@ -35,6 +35,7 @@ for i = 1 : size(mu_hf,1)
 end
 
 it = 0; stopp = 0;
+tic
 while(it < Nit && stopp == 0)
     %check nodes update
 %     for i = 1 : size(mu_fh,1)
@@ -54,8 +55,9 @@ while(it < Nit && stopp == 0)
 %         end
 %     end
     
-    %alternative update    
-    tmp1 = arrayfun(@phy_tilde,abs(mu_hf));
+    %alternative update 
+    %tmp1 = arrayfun(@phy_tilde,abs(mu_hf));
+    tmp1 = phy_tilde2(abs(mu_hf));
     
     tmp2 = sum(tmp1,1).';
     
@@ -65,9 +67,11 @@ while(it < Nit && stopp == 0)
     
     tmp5 = prod(tmp4,1).';
     
-    mu_fh = arrayfun(@phy_tilde,tmp3);
+    %mu_fh = arrayfun(@phy_tilde,tmp3);
+    mu_fh = phy_tilde2(tmp3);
     
     mu_fh = mu_fh.*(tmp5*ones(1,n).*tmp4.');
+    
     
     %variable nodes update
 %     for i = 1 : size(mu_hf,1)
@@ -89,18 +93,17 @@ while(it < Nit && stopp == 0)
     tmp = sum(mu_fh).' + g;
     mu_hf = (tmp*ones(1,n-k)).*(H.') - mu_fh.';
 
-    for i = 1 : length(g)
-        mu_hg(i) = sum(mu_fh(:,i));
-    end
+    mu_hg = sum(mu_fh,1);
 
     %marginalization
-    for i = 1 : length(g)
-        if(mu_hg(i)+g(i) >= 0)
-            c_hat(i) = 0;
-        else
-            c_hat(i) = 1;
-        end
-    end
+%     for i = 1 : length(g)
+%         if(mu_hg(i)+g(i) >= 0)
+%             c_hat(i) = 0;
+%         else
+%             c_hat(i) = 1;
+%         end
+%     end
+    c_hat = (mu_hg.'+g)<0;
     
     if(sum(mod(H*c_hat,2)) == 0)
         %stopp = 1;
@@ -108,6 +111,7 @@ while(it < Nit && stopp == 0)
     
     it = it + 1;
 end
+toc
 
 u_hat = c_hat(1:k); %Estimated message
 err = sum(u_hat ~= u);
@@ -132,5 +136,7 @@ end
 
 function y = phy_tilde2(x)
 
-    y = arrayfun(@phy_tilde,x);
+    ind = x>0;
+    y = zeros(size(x));
+    y(ind) = -log(tanh(0.5*x(ind)));
 end

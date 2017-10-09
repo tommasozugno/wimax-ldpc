@@ -14,7 +14,7 @@ function u_hat = decode2(r,sigmaw,H,k,Nit)
     it = 0; stopp = 0;
     while(it < Nit && stopp == 0)
         %check nodes update
-        tmp1 = arrayfun(@phy_tilde,abs(mu_hf));
+        tmp1 = phy_tilde(abs(mu_hf));
     
         tmp2 = sum(tmp1,1).';
 
@@ -24,25 +24,18 @@ function u_hat = decode2(r,sigmaw,H,k,Nit)
 
         tmp5 = prod(tmp4,1).';
 
-        mu_fh = arrayfun(@phy_tilde,tmp3).*(tmp5*ones(1,size(H,2)).*tmp4.');
+        mu_fh =  phy_tilde(tmp3).*(tmp5*ones(1,size(H,2)).*tmp4.');
 
         %variable nodes update
         tmp = sum(mu_fh).' + g;
         mu_hf = (tmp*ones(1,size(H,1))).*(H.') - mu_fh.';
         
-        for i = 1 : length(g)
-            mu_hg(i) = sum(mu_fh(:,i));
-        end
+        mu_hg = sum(mu_fh,1);
+
 
         %marginalization
-        for i = 1 : length(g)
-            if(mu_hg(i)+g(i) >= 0)
-                c_hat(i) = 0;
-            else
-                c_hat(i) = 1;
-            end
-        end
-        
+        c_hat = (mu_hg.'+g)<0;
+       
         if(sum(mod(H*c_hat,2)) == 0)
             %stopp = 1;
         end
@@ -53,14 +46,10 @@ function u_hat = decode2(r,sigmaw,H,k,Nit)
 end
 
 function y = phy_tilde(x)
-    %y = -log(phy_inv(x));
-    if(x<=0)
-        y = 0;
-    else
-        if(x<10^-2)
-            y = 6;
-        else
-            y = -log(tanh(0.5*x));
-        end
-    end
+
+    ind = x>0 & x<10^-2;
+    ind2 = x>=10^-2;
+    y = zeros(size(x));
+    y(ind) = 6;
+    y(ind2) = -log(tanh(0.5*x(ind2)));
 end
