@@ -1,7 +1,7 @@
 clear all;
 close all;
 
-save_results = 1;
+save_results = 0;
 
 load matrices/96.33.964.mat
 
@@ -26,7 +26,6 @@ SNR = 10.^(SNR_dB/10);
 sigmaw = sqrt(1./SNR); %Noise variance
 w = randn(length(c_mod),1);
 
-tic
 for snr = 1 : length(SNR)
     r = c_mod + w*sigmaw(snr);
     
@@ -37,7 +36,6 @@ for snr = 1 : length(SNR)
     
     err(snr) = sum(u_hat ~= u);
 end
-toc
 
 Pbit = err/(Npck*k);
 
