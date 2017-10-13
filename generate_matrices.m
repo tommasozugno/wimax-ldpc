@@ -1,16 +1,42 @@
-%Script that generates the matrices G and H given the corresponding alist
-%file. The matrix G in systematic form is obtained by using the gauss-
-%eliminaition method.
-
 clear all;
 close all;
 
-load matrices/alist96.33.964.mat;
+%********************
+%   rate 1 --> 1/2  *
+%   rate 2 --> 2/3B *
+%   rate 3 --> 3/4A *
+%   rate 4 --> 3/4B *
+%   rate 5 --> 5/6  *
+%********************
 
-H = alisttoH(alist);
-H = H.';
-n = alist(1,1); m = alist(1,2); k = alist(1,3);
+%Parameters*************************
+rate = 1; %Code rate               *
+n = 576; %Codeword length 2304     *
+%***********************************
 
+switch rate
+    case 1, R = 1/2; load Hb_r1_2.mat;
+    case 2, R = 2/3; load Hb_r2_3B.mat;
+    case 3, R = 3/4; load Hb_r3_4A.mat;
+    case 4, R = 3/4; load Hb_r3_4B.mat;
+    case 5, R = 5/6; load Hb_r5_6.mat;
+end     
+k = R*n; %Infoword length
+m = n - k; %Number of parity checks
+z = n/24; %Expansion factor
+ 
+%Compute the base matrix for the given rate and codeword length
+Hbm = p(Hbm0,z);
+
+%Derive the parity check matrix
+H = zeros(m,n);
+for i = 0 : size(Hbm,1)-1
+    for j = 0 : size(Hbm,2)-1
+        H(i*z+1 : (i+1)*z , j*z+1 : (j+1)*z) = expand(Hbm(i+1,j+1),z);
+    end
+end
+
+%Compute the generating matrix
 B = H(: , 1 : k);
 C = H(: , k+1 : end);
 while(gfrank(C,2) < m)
@@ -21,11 +47,11 @@ end
 
 C_1 = invGF2(C);
 A = mod(C_1*B,2);
-G_prime = [eye(k) ; -A]; %generating matrix (systematic form [Ik ; -A])
-H_prime = [A eye(n-k)];
+G_prime = [eye(k) ; A]; %generating matrix (systematic form [Ik ; -A])
+H_prime = [A eye(m)];
 
 %test
-if(H*G_prime ~= zeros(m,m))
+if(H*G_prime ~= zeros(m,k))
     display('ERROR: matrix G is not correct 1');
 end
 
@@ -37,20 +63,30 @@ if(mod(H*c,2) ~= zeros(m,1))
 end
 
 G = G_prime;
-save('matrices/96.33.964.mat','H','G','n','k');
 
+save(strcat('matrices/r',num2str(rate),'n',num2str(n),'.mat'),'H','A','n','k');
 
-%Reference: http://www.inference.org.uk/mackay/codes/alist.html
-%Function to obtain H from the corresponding alist file.
-%You have to remove the 3th and the 4th row from the original alist file.
-function H = alisttoH(alist)
+function Y = expand(x,z)
+    if(x<0)
+        Y = zeros(z);
+    else
+        Y = circshift(eye(z),x,1);
+    end
+end
 
-    H = zeros(alist(1,1),alist(1,2));
-    for i = 1 : size(H,1)
-        for j = 1 : alist(2,1)
-            H(i,alist(i+2,j)) = 1;
+function Y = p(Hbm0,z)
+    
+    Y = zeros(size(Hbm0));
+    for i = 1 : size(Hbm0,1)
+        for j = 1 : size(Hbm0,2)
+            if(Hbm0(i,j)<=0)
+                Y(i,j) = Hbm0(i,j);
+            else
+                Y(i,j) = floor(Hbm0(i,j)*z/96);
+            end
         end
     end
+    
 end
 
 %Find the inverse of a binary matrix using the gauss elimination method
@@ -83,3 +119,4 @@ function C_1 = invGF2(C)
     end
     C_1 = A(:,m+1:end);
 end
+
