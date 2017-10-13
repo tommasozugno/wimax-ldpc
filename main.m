@@ -1,49 +1,69 @@
 clear all;
 close all;
 
-save_results = 0;
-
+save_results = 1;
 load matrices/96.33.964.mat
 
+%Parameters  **************************************************************
 Nit = 20; %Number of iterations on the graph
+Max_npck = 1000; %Maximum number of packets
+Th_err = 100; %Error threshold
+SNR_dB = 1: 1 : 5; %SNR range in dB
+SNR = 10.^(SNR_dB/10); %Linear SNR range
+sigmaw = sqrt(1./SNR); %Noise variance range
+%**************************************************************************
 
-%Generate data
-Npck = 100;
-u = randi([0,1],[Npck*k,1]);
+%Initialization
+err = zeros(1,length(SNR_dB));
+Npck = zeros(1,length(SNR_dB));
 
-%Encode
-c = [];
-for i = 0 : Npck-1
-    c = [c ; mod(G*u(k*i+1:(i+1)*k) , 2)];
-end
-
-%Modulate
-c_mod = 2*c-1;
-
-%Channel
-SNR_dB = 1: 1 : 5;
-SNR = 10.^(SNR_dB/10);
-sigmaw = sqrt(1./SNR); %Noise variance
-w = randn(length(c_mod),1);
-
-for snr = 1 : length(SNR)
-    r = c_mod + w*sigmaw(snr);
+tic
+for npck = 1 : Max_npck
     
-    u_hat = [];
-    for npck = 0 : Npck-1
-        u_hat = [u_hat ; decode2(r(npck*n+1 : (npck+1)*n),sigmaw(snr),H,k,Nit)];
+    %Generate info data
+    u = randi([0,1],[k,1]);
+    
+    %Encoding
+    c = mod(G*u,2);
+    
+    %Modulation
+    c_mod = c*2-1;
+    
+    %Generate noise samples
+    w = randn(n,1);
+    
+    for snr = 1 : length(SNR_dB)
+        
+        if(err(snr) < Th_err)
+            %Received vector
+            r = c_mod + sigmaw(snr)*w;
+
+            %Decoding
+            u_hat = decode2(r, sigmaw(snr), H, k, Nit);
+
+            %Count errors
+            err(snr) = err(snr) + sum(u_hat ~= u);
+
+            %Count packets
+            Npck(snr) = Npck(snr) + 1;
+        end
     end
-    
-    err(snr) = sum(u_hat ~= u);
 end
 
-Pbit = err/(Npck*k);
+%Time per packet
+time = toc/sum(Npck);
+
+%BER
+Pbit = err./(Npck*k);
+
+%Warning flag = 1 if err < th_err
+warn = err < Th_err;
 
 %% - Results
 
 %save results
 if(save_results)
-    save(strcat('results/',datestr(clock)),'Pbit','SNR_dB','Npck','Nit');
+    save(strcat('results/',datestr(clock)),'Pbit','SNR_dB','warn','Npck','err','Nit','time','Max_npck','Th_err');
 end
 
 %Uncoded BER
@@ -53,7 +73,7 @@ Pbit_uncoded = qfunc(sqrt(2*SNR));
 figure;
 set(0,'defaultTextInterpreter','latex') % to use LaTeX format
 set(gca,'FontSize',14);
-semilogy(SNR_dB,Pbit,'k-',SNR_dB,Pbit_uncoded,'b--','LineWidth',2)
+semilogy(SNR_dB,Pbit,'k-',SNR_dB,Pbit_uncoded,'b--',SNR_dB,Pbit.*warn,'rx','LineWidth',2)
 axis([min(SNR_dB) max(SNR_dB) 1e-7 1e0])
 hleg = legend('Simulation','Uncoded BER');
 set(hleg,'position',[0.15 0.13 0.32 0.15]);
