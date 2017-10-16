@@ -1,7 +1,7 @@
 clear all;
 close all;
 
-save_results = 1;
+save_results = 0;
 load matrices/96.33.964.mat
 
 %Parameters  **************************************************************
@@ -24,7 +24,7 @@ for npck = 1 : Max_npck
     u = randi([0,1],[k,1]);
     
     %Encoding
-    c = mod(G*u,2);
+    c = [u ; mod(A*u,2)];
     
     %Modulation
     c_mod = c*2-1;

@@ -21,7 +21,7 @@ end
 
 C_1 = invGF2(C);
 A = mod(C_1*B,2);
-G_prime = [eye(k) ; -A]; %generating matrix (systematic form [Ik ; -A])
+G_prime = [eye(k) ; A]; %generating matrix (systematic form [Ik ; -A])
 H_prime = [A eye(n-k)];
 
 %test
@@ -36,8 +36,7 @@ if(mod(H*c,2) ~= zeros(m,1))
     display('ERROR: matrix G is not correct');
 end
 
-G = G_prime;
-save('matrices/96.33.964.mat','H','G','n','k');
+save('matrices/96.33.964.mat','H','A','n','k');
 
 
 %Reference: http://www.inference.org.uk/mackay/codes/alist.html
