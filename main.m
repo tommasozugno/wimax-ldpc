@@ -2,7 +2,9 @@ clear all;
 close all;
 
 save_results = 0;
+%load matrices/r1n576.mat
 load matrices/96.33.964.mat
+H = sparse(H);
 
 %Parameters  **************************************************************
 Nit = 20; %Number of iterations on the graph

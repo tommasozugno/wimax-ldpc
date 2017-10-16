@@ -45,7 +45,7 @@ function y = phy_tilde(x)
     ind = x>0 & x<10^-5;
     ind2 = x>=10^-5 & x<50;
     ind3 = x>=50;
-    y = zeros(size(x));
+    y = sparse(size(x,1),size(x,2));
     y(ind) = 12.5;
     y(ind2) = -log(tanh(0.5*x(ind2)));
     y(ind3) = 0;    
