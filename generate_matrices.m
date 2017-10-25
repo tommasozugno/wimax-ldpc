@@ -15,11 +15,11 @@ n = 576; %Codeword length 2304     *
 %***********************************
 
 switch rate
-    case 1, R = 1/2; load Hb_r1_2.mat;
-    case 2, R = 2/3; load Hb_r2_3B.mat;
-    case 3, R = 3/4; load Hb_r3_4A.mat;
-    case 4, R = 3/4; load Hb_r3_4B.mat;
-    case 5, R = 5/6; load Hb_r5_6.mat;
+    case 1, R = 1/2; load matrices/Hb_r1_2.mat;
+    case 2, R = 2/3; load matrices/Hb_r2_3B.mat;
+    case 3, R = 3/4; load matrices/Hb_r3_4A.mat;
+    case 4, R = 3/4; load matrices/Hb_r3_4B.mat;
+    case 5, R = 5/6; load matrices/Hb_r5_6.mat;
 end     
 k = R*n; %Infoword length
 m = n - k; %Number of parity checks

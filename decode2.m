@@ -32,7 +32,7 @@ function u_hat = decode2(r,sigmaw,H,k,Nit)
         c_hat = (mu_hg.'+g)<0;
        
         if(sum(mod(H*c_hat,2)) == 0)
-            %stopp = 1;
+            stopp = 1;
         end
         
         it = it + 1;
