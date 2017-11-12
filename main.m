@@ -11,8 +11,8 @@ save_results = 1;
 %   rate 5 --> 5/6  *
 %********************
 
-rate = 5; %Code rate
-n = 576;  %Codeword length
+rate = 4; %Code rate
+n = 2304;  %Codeword length
 
 load(strcat('matrices/r',num2str(rate),'n',num2str(n)));
 %load matrices/96.33.964.mat
@@ -20,9 +20,9 @@ H = sparse(H);
 
 %Parameters  **************************************************************
 Nit = 50; %Number of iterations on the graph
-Max_npck = 100000; %Maximum number of packets
+Max_npck = 10000; %Maximum number of packets
 Th_err = 100; %Error threshold
-SNR_dB = 6.5; %SNR range in dB
+SNR_dB = 4.5; %SNR range in dB
 SNR = 10.^(SNR_dB/10); %Linear SNR range
 sigmaw = sqrt(1./SNR); %Noise variance range
 %**************************************************************************
@@ -64,8 +64,8 @@ for npck = 1 : Max_npck
     end
 end
 
-%Time per packet
-time = toc/sum(Npck);
+%Time
+time = toc;
 
 %BER
 Pbit = err./(Npck*k);
@@ -77,7 +77,7 @@ warn = err < Th_err;
 
 %save results
 if(save_results)
-    save(strcat('results/',datestr(clock)),'Pbit','SNR_dB','warn','Npck','err','Nit','time','Max_npck','Th_err','rate','n');
+    save(strcat('results/',datestr(clock)),'Pbit','SNR_dB','Npck','err','Nit','time','Max_npck','Th_err','rate','n');
 end
 
 %Uncoded BER
