@@ -66,7 +66,7 @@ if(~isequal(gf(H,1)*c,gf(zeros(m,1),1)))
     display('ERROR: matrix G is not correct');
 end
 
-save(strcat('matrices2/r',num2str(rate),'n',num2str(n),'.mat'),'M1','M2','M3','n','k');
+save(strcat('matrices/r',num2str(rate),'n',num2str(n),'.mat'),'M1','M2','M3','H','n','k');
 
 function Y = expand(x,z)
     if(x<0)
