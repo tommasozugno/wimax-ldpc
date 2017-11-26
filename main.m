@@ -1,7 +1,7 @@
 clear all;
 close all;
 
-save_results = 0;
+save_results = 1;
 
 %********************
 %   rate 1 --> 1/2  *
@@ -11,8 +11,8 @@ save_results = 0;
 %   rate 5 --> 5/6  *
 %********************
 
-rate = 1; %Code rate
-n = 576;  %Codeword length
+rate = 3; %Code rate
+n = 1344;  %Codeword length
 
 load(strcat('matrices/r',num2str(rate),'n',num2str(n)));
 %load matrices/96.33.964.mat
@@ -23,10 +23,10 @@ M2 = double(M2.x);
 M3 = double(M3.x);
 
 %Parameters  **************************************************************
-Nit = 50; %Number of iterations on the graph
-Max_npck = 10000; %Maximum number of packets
-Th_err = 100; %Error threshold
-SNR_dB = 1; %SNR range in dB
+Nit = 10; %Number of iterations on the graph
+Max_npck = 100000; %Maximum number of packets
+Th_err = 500; %Error threshold
+SNR_dB = 3.5; %SNR range in dB
 SNR = 10.^(SNR_dB/10); %Linear SNR range
 sigmaw = sqrt(1./SNR); %Noise variance range
 %**************************************************************************
@@ -58,11 +58,11 @@ for npck = 1 : Max_npck
             %Received vector
             r = c_mod + sigmaw(snr)*w;
             
-            tic
+            %tic
             %Decoding
             u_hat = decode2(r, sigmaw(snr), H, k, Nit);
             
-            time(snr) = time(snr) + toc;
+            %time(snr) = time(snr) + toc;
 
             %Count errors
             err(snr) = err(snr) + sum(u_hat ~= u);
@@ -74,7 +74,7 @@ for npck = 1 : Max_npck
 end
 
 %Average time to decode a packet
-time = time./Npck;
+%time = time./Npck;
 
 %BER
 Pbit = err./(Npck*k);

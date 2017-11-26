@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+#$ -cwd
+#
+# Non redirigo l'output: ogni esecuzione generera'
+# un file di output diverso
+#
+# Voglio ricevere una mail quando il job termina
+# o in caso venga abortito
+#
+#$ -m ea
+#
+#
+matlab -r “main”

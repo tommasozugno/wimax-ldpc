@@ -10,8 +10,8 @@ close all;
 %********************
 
 %Parameters*************************
-rate = 5; %Code rate               *
-n = 576; %Codeword length 2304     *
+rate = 1; %Code rate               *
+n = 2304; %Codeword length 2304     *
 %***********************************
 
 switch rate
