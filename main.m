@@ -23,10 +23,10 @@ M2 = double(M2.x);
 M3 = double(M3.x);
 
 %Parameters  **************************************************************
-Nit = 1; %Number of iterations on the graph
-Max_npck = 10; %Maximum number of packets
-Th_err = 1; %Error threshold
-SNR_dB = 50; %SNR range in dB
+Nit = 50; %Number of iterations on the graph
+Max_npck = 10000; %Maximum number of packets
+Th_err = 100; %Error threshold
+SNR_dB = [6 7]; %SNR range in dB
 SNR = 10.^(SNR_dB/10); %Linear SNR range
 sigmaw = sqrt(1./SNR); %Noise variance range
 useQPSK = true;
@@ -135,4 +135,4 @@ end
 % ylabel('BER $P_{\rm bit}$')
 % set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on',...
 %         'YGrid', 'on', 'XGrid', 'on');
-    
+%     

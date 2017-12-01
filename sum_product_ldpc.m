@@ -14,7 +14,7 @@ c = mod(G*u , 2); %Codeword
 c_mod = modulate(c);
 
 %% Channel
-SNR_dB = 0;
+SNR_dB = 10;
 SNR = 10^(SNR_dB/10);
 sigmaw = sqrt(1/SNR); %Noise variance
 
@@ -23,7 +23,7 @@ r = c_mod + w*sigmaw/sqrt(2); %Received vector
 %r = [-2.5467 0.2358 -1.3929 -3.0287 -1.8290 -1.1768 -1.9434 -0.1152].';
 
 %% Decoder
-Nit = 50; %Number of iterations on the graph
+Nit = 1; %Number of iterations on the graph
 
 %initialization
 Q = 2; %modulation order
@@ -50,8 +50,7 @@ mu_wh = zeros(n/Q, n);
 
 mu_hf = H.'; %messages from variable to check
 mu_fh = H; %messages from check to variable
-mu_hg = zeros(1,length(g)); %messages from variable to leaf
-q = ones(n,1);
+%mu_hg = zeros(1,length(g)); %messages from variable to leaf
 
 it = 0; stopp = 0;
 tic
@@ -74,6 +73,7 @@ while(it < Nit && stopp == 0)
 %         end
 %     end
 
+    %Messages from conform to variable
     for i = 1 : n/Q
         for q = 1 : Q
             tmp = zeros(2^Q,1);
@@ -103,7 +103,7 @@ while(it < Nit && stopp == 0)
         end
     end
     
-    
+    %Messages from check to variable
     %alternative update 
     %tmp1 = arrayfun(@phy_tilde,abs(mu_hf));
     tmp1 = phy_tilde2(abs(mu_hf));
@@ -151,18 +151,18 @@ while(it < Nit && stopp == 0)
 % Messages from variable to conform, bit
     for i = 1 : n
         mu_hw(i,ceil(i/Q)) = sum(mu_fh(:,i));
-        mu_hq(i) = sum(mu_fh(:,i))+mu_wh(ceil(i/Q),i);
     end
     
     %marginalization
-%     for i = 1 : length(g)
-%         if(mu_hg(i)+g(i) >= 0)
-%             c_hat(i) = 0;
-%         else
-%             c_hat(i) = 1;
-%         end
-%     end
-    c_hat = (mu_hq.'+q)<0;
+    for i = 1 : n
+        display(strcat(num2str(i), ',' , num2str(ceil(i/Q))));
+       if(mu_hw(i,ceil(i/Q)) + mu_wh(ceil(i/Q),i) >= 0)
+           c_hat(i) = 0;
+       else
+           c_hat(i) = 1;
+       end
+    end
+    %c_hat = (mu_hw.'+q)<0;
     
     if(sum(mod(H*c_hat,2)) == 0)
         %stopp = 1;

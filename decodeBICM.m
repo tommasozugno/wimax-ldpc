@@ -16,15 +16,16 @@ function u_hat = decodeBICM(r,sigmaw,H,k,Nit,Q,C,d)
     c_hat = zeros(n,1); %estimated codeword
     
     %messages from variable to conform
-    mu_hw = zeros(n, n/Q);
+    Mc = zeros(n, n/Q);
     for i = 1 : n/Q
-        mu_hw(2*i-1:2*i, i) = [1 1];
+        Mc(2*i-1:2*i, i) = [1 1];
     end
+    mu_hw = Mc;
     
     %messages from conform to variable
     mu_wh = zeros(n/Q, n);
      
-    mu_hf = H.'; %messages from variable to check
+    %mu_hf = H.'; %messages from variable to check
     mu_fh = H; %messages from check to variable
     
     it = 0; stopp = 0;
@@ -43,21 +44,9 @@ function u_hat = decodeBICM(r,sigmaw,H,k,Nit,Q,C,d)
             end
         end
         
-        %messages from variable to check
-        for i = 1 : size(mu_hf,1)
-            for j = 1 : size(mu_hf,2)
-
-                if(mu_hf(i,j) ~= 0)
-                    tmp1 = 0;
-                    for l = 1 : size(mu_fh,1)
-                        if(l ~= j)
-                            tmp1 = tmp1 + mu_fh(l,i);
-                        end
-                    end
-                    mu_hf(i,j) = tmp1 + mu_wh(ceil(i/Q),i);
-                end
-            end
-        end
+        %variable nodes update
+        tmp = sum(mu_fh).' + sum(mu_wh).';
+        mu_hf = (tmp*ones(1,m)).*(H.') - mu_fh.';
         
         %check nodes update
         tmp1 = phy_tilde(abs(mu_hf));
@@ -67,18 +56,10 @@ function u_hat = decodeBICM(r,sigmaw,H,k,Nit,Q,C,d)
         mu_fh =  phy_tilde(tmp3).*(tmp5*ones(1,n).*tmp4.'); %messages from check to variable
 
         % Messages from variable to conform, bit
-        for i = 1 : n
-            mu_hw(i,ceil(i/Q)) = sum(mu_fh(:,i));
-        end
+        mu_hw = sum(mu_fh).'.*Mc;
         
         %marginalization
-        for i = 1 : n
-           if(mu_hw(i,ceil(i/Q)) + mu_wh(ceil(i/Q),i) >= 0)
-               c_hat(i) = 0;
-           else
-               c_hat(i) = 1;
-           end
-        end
+        c_hat = (sum(mu_hw + mu_wh.',2) < 0);
        
         if(sum(mod(H*c_hat,2)) == 0)
             stopp = 1;
