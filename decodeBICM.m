@@ -55,7 +55,7 @@ function u_hat = decodeBICM(r,sigmaw,H,k,Nit,Q,C,d)
         tmp5 = prod(tmp4,1).';
         mu_fh =  phy_tilde(tmp3).*(tmp5*ones(1,n).*tmp4.'); %messages from check to variable
 
-        % Messages from variable to conform, bit
+        % Messages from variable to conform
         mu_hw = sum(mu_fh).'.*Mc;
         
         %marginalization

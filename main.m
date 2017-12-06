@@ -24,9 +24,9 @@ M3 = double(M3.x);
 
 %Parameters  **************************************************************
 Nit = 50; %Number of iterations on the graph
-Max_npck = 10000; %Maximum number of packets
+Max_npck = 1000; %Maximum number of packets
 Th_err = 100; %Error threshold
-SNR_dB = [6 7]; %SNR range in dB
+SNR_dB = [1 2 3 4 5]; %SNR range in dB
 SNR = 10.^(SNR_dB/10); %Linear SNR range
 sigmaw = sqrt(1./SNR); %Noise variance range
 useQPSK = true;
@@ -78,8 +78,10 @@ for npck = 1 : Max_npck
 
                 if(useQPSK)
                     %QPSK
-                    %Received vector
-                    r = c_mod + w*sigmaw/sqrt(2);
+                    %Received vector ????????????????????????
+                    %r = c_mod + w*sigmaw(snr)/sqrt(2);
+                    r = c_mod + w*sigmaw(snr);
+
                     %Decoding
                     u_hat = decodeBICM(r, sigmaw(snr), H, k, Nit, Q, C, d);
                 else
