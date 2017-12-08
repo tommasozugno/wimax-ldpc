@@ -1,29 +1,27 @@
-function y = modulate(c, useQPSK)
+function y = modulate(c, Q)
 
-    if(useQPSK)
-        %QPSK
-        if(mod(length(c),2) ~= 0)
-            display('Error: c length is not multiple of 2');
-            c = [c , zeros(1,2-mod(length(c),2))]; %zero padding
-        end
-
-        c_mod = zeros(length(c)/2,1);
-        for i = 0 : length(c)/2-1
-            if(c(2*i+1) == 0)
-                c_mod(i+1) = 1;
-            else
-                c_mod(i+1) = -1;
+    switch Q
+        
+        case 1  %BPSK
+            y = c*2-1;
+            
+        case 2 %QPSK
+            for i = 1 : length(c)/2
+                tmp(i) = bi2de(c(2*i-1:2*i),'left-msb');
             end
-
-            if(c(2*(i+1)) == 0)
-                c_mod(i+1) = c_mod(i+1) + 1i;
-            else
-                c_mod(i+1) = c_mod(i+1) - 1i;
+            y = qammod(tmp,4);
+            
+        case 4 %16QAM
+            for i = 1 : length(c)/4
+                tmp(i) = bi2de(c(4*i-3:4*i),'left-msb');
             end
-        end
-        y = c_mod;
-    else
-        %BPSK
-        y = c*2-1;
+            y = qammod(tmp,16,'UnitAveragePower',true)*sqrt(4);
+            
+        case 6 %64QAM
+            for i = 1 : length(c)/6
+                tmp(i) = bi2de(c(6*i-5:6*i),'left-msb');
+            end
+            y = qammod(tmp,64,'UnitAveragePower',true)*sqrt(6);
+            
     end
 end   

@@ -26,10 +26,10 @@ M3 = double(M3.x);
 Nit = 50; %Number of iterations on the graph
 Max_npck = 1000; %Maximum number of packets
 Th_err = 100; %Error threshold
-SNR_dB = [1 2 3 4 5]; %SNR range in dB
+SNR_dB = [13 15]; %SNR range in dB
 SNR = 10.^(SNR_dB/10); %Linear SNR range
 sigmaw = sqrt(1./SNR); %Noise variance range
-useBICM = true;
+Q = 6; %Modulation order
 %**************************************************************************
 
 %Initialization
@@ -38,11 +38,10 @@ Npck = zeros(1,length(SNR_dB));
 time = zeros(1,length(SNR_dB));
 
 %Arguments for decodeBICM
-if(useBICM)
-    Q = 2; %modulation order
-    C = logical([0 0 ; 0 1 ; 1 0 ; 1 1]);
+if(Q > 1)
+    C = logical(de2bi(0:2^Q-1,'left-msb'));
     for i = 1 : size(C,1)
-        d(i) = modulate(C(i,:),true);
+        d(i) = modulate(C(i,:),Q);
     end
 end
 
@@ -60,12 +59,12 @@ for npck = 1 : Max_npck
         c = [u ; p1t ; p2t];
 
         %Modulation
-        c_mod = modulate(c, useBICM);
+        c_mod = modulate(c.', Q);
 
 
         %Generate noise samples
-        if(useBICM)
-            %QPSK
+        if(Q > 1)
+            %QPSK, 16QAM, 64QAM
             w = randn(size(c_mod)) + 1i*randn(size(c_mod));
         else
             %BPSK
@@ -76,12 +75,10 @@ for npck = 1 : Max_npck
 
             if(err(snr) < Th_err)
 
-                if(useBICM)
-                    %QPSK
-                    %Received vector ????????????????????????
-                    %r = c_mod + w*sigmaw(snr)/sqrt(2);
+                if(Q > 1)
+                    %QPSK, 16QAM, 64QAM
+                    %Received vector
                     r = c_mod + w*sigmaw(snr);
-
                     %Decoding
                     u_hat = decodeBICM(r, sigmaw(snr), H, k, Nit, Q, C, d);
                 else
@@ -122,19 +119,20 @@ if(save_results)
     save(strcat('results/',datestr(clock)),'Pbit','SNR_dB','Npck','err','Nit','time','Max_npck','Th_err','rate','n');
 end
 
-%Uncoded BER
-Pbit_uncoded = qfunc(sqrt(2*SNR));
+if(false)
+    %Uncoded BER
+    Pbit_uncoded = qfunc(sqrt(2*SNR));
 
-% show results
-figure;
-set(0,'defaultTextInterpreter','latex') % to use LaTeX format
-set(gca,'FontSize',14);
-semilogy(SNR_dB,Pbit,'k-',SNR_dB,Pbit_uncoded,'b--',SNR_dB,Pbit.*warn,'rx','LineWidth',2)
-axis([min(SNR_dB) max(SNR_dB) 1e-7 1e0])
-hleg = legend('Simulation','Uncoded BER');
-set(hleg,'position',[0.15 0.13 0.32 0.15]);
-xlabel('$E_b/N_0$  [dB]')
-ylabel('BER $P_{\rm bit}$')
-set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on',...
-        'YGrid', 'on', 'XGrid', 'on');
-    
+    % show results
+    figure;
+    set(0,'defaultTextInterpreter','latex') % to use LaTeX format
+    set(gca,'FontSize',14);
+    semilogy(SNR_dB,Pbit,'k-',SNR_dB,Pbit_uncoded,'b--',SNR_dB,Pbit.*warn,'rx','LineWidth',2)
+    axis([min(SNR_dB) max(SNR_dB) 1e-7 1e0])
+    hleg = legend('Simulation','Uncoded BER');
+    set(hleg,'position',[0.15 0.13 0.32 0.15]);
+    xlabel('$E_b/N_0$  [dB]')
+    ylabel('BER $P_{\rm bit}$')
+    set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on',...
+            'YGrid', 'on', 'XGrid', 'on');
+end
