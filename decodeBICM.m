@@ -34,12 +34,13 @@ function u_hat = decodeBICM(r,sigmaw,H,k,Nit,Q,C,d)
         %Messages from conform to variable
         for i = 1 : n/Q
             for q = 1 : Q
-                tmp = zeros(2^Q,1);
+                tmp = ones(2^Q,1);
                 for p = 1 : Q
                     if(p~=q)
-                        tmp = tmp + g(:,i).*(~C(:,p)*exp(mu_hw(2*(i-1)+p,i))+C(:,p));
-                    end
+                        tmp = tmp.*(~C(:,p)*exp(mu_hw(Q*(i-1)+p,i))+C(:,p));
+                    end                    
                 end
+                tmp = tmp.*g(:,i);
                 mu_wh(i,2*(i-1)+q) = log( sum(tmp(~C(:,q))) / sum(tmp(C(:,q))) );
             end
         end

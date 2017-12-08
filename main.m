@@ -1,7 +1,7 @@
 clear all;
 close all;
 
-save_results = 1;
+save_results = 0;
 
 %********************
 %   rate 1 --> 1/2  *
@@ -29,7 +29,7 @@ Th_err = 100; %Error threshold
 SNR_dB = [1 2 3 4 5]; %SNR range in dB
 SNR = 10.^(SNR_dB/10); %Linear SNR range
 sigmaw = sqrt(1./SNR); %Noise variance range
-useQPSK = true;
+useBICM = true;
 %**************************************************************************
 
 %Initialization
@@ -38,7 +38,7 @@ Npck = zeros(1,length(SNR_dB));
 time = zeros(1,length(SNR_dB));
 
 %Arguments for decodeBICM
-if(useQPSK)
+if(useBICM)
     Q = 2; %modulation order
     C = logical([0 0 ; 0 1 ; 1 0 ; 1 1]);
     for i = 1 : size(C,1)
@@ -60,11 +60,11 @@ for npck = 1 : Max_npck
         c = [u ; p1t ; p2t];
 
         %Modulation
-        c_mod = modulate(c, useQPSK);
+        c_mod = modulate(c, useBICM);
 
 
         %Generate noise samples
-        if(useQPSK)
+        if(useBICM)
             %QPSK
             w = randn(size(c_mod)) + 1i*randn(size(c_mod));
         else
@@ -76,7 +76,7 @@ for npck = 1 : Max_npck
 
             if(err(snr) < Th_err)
 
-                if(useQPSK)
+                if(useBICM)
                     %QPSK
                     %Received vector ????????????????????????
                     %r = c_mod + w*sigmaw(snr)/sqrt(2);
@@ -122,19 +122,19 @@ if(save_results)
     save(strcat('results/',datestr(clock)),'Pbit','SNR_dB','Npck','err','Nit','time','Max_npck','Th_err','rate','n');
 end
 
-% %Uncoded BER
-% Pbit_uncoded = qfunc(sqrt(2*SNR));
-% 
-% % show results
-% figure;
-% set(0,'defaultTextInterpreter','latex') % to use LaTeX format
-% set(gca,'FontSize',14);
-% semilogy(SNR_dB,Pbit,'k-',SNR_dB,Pbit_uncoded,'b--',SNR_dB,Pbit.*warn,'rx','LineWidth',2)
-% axis([min(SNR_dB) max(SNR_dB) 1e-7 1e0])
-% hleg = legend('Simulation','Uncoded BER');
-% set(hleg,'position',[0.15 0.13 0.32 0.15]);
-% xlabel('$E_b/N_0$  [dB]')
-% ylabel('BER $P_{\rm bit}$')
-% set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on',...
-%         'YGrid', 'on', 'XGrid', 'on');
-%     
+%Uncoded BER
+Pbit_uncoded = qfunc(sqrt(2*SNR));
+
+% show results
+figure;
+set(0,'defaultTextInterpreter','latex') % to use LaTeX format
+set(gca,'FontSize',14);
+semilogy(SNR_dB,Pbit,'k-',SNR_dB,Pbit_uncoded,'b--',SNR_dB,Pbit.*warn,'rx','LineWidth',2)
+axis([min(SNR_dB) max(SNR_dB) 1e-7 1e0])
+hleg = legend('Simulation','Uncoded BER');
+set(hleg,'position',[0.15 0.13 0.32 0.15]);
+xlabel('$E_b/N_0$  [dB]')
+ylabel('BER $P_{\rm bit}$')
+set(gca, 'XMinorTick', 'on', 'YMinorTick', 'on',...
+        'YGrid', 'on', 'XGrid', 'on');
+    

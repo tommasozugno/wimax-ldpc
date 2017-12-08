@@ -131,7 +131,7 @@ SNR_dB1 = SNR_dB;
 % Pbit2 = Pbit;
 % SNR_dB2 = SNR_dB;
 
-load results/BICM/test2.mat;
+load results/BICM/qpsk.mat;
 Pbit3 = Pbit;
 SNR_dB3 = SNR_dB;
 
@@ -145,7 +145,7 @@ Pbit_uncoded = qfunc(sqrt(2*SNR));
 figure;
 set(0,'defaultTextInterpreter','latex') % to use LaTeX format
 set(gca,'FontSize',14);
-semilogy(SNR_dB1,Pbit1,'k-',SNR_dB3,Pbit3,'ro-','LineWidth',2,'MarkerSize',10)
+semilogy(SNR_dB1,Pbit1,'k-',SNR_dB3,Pbit3,'ro-',SNR_dBU,Pbit_uncoded,'b--','LineWidth',2,'MarkerSize',10)
 axis([1 10 1e-5 1])
 hleg = legend('BPSK','QPSK');
 set(hleg,'position',[0.15 0.13 0.32 0.15]);
