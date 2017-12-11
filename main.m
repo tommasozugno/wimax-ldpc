@@ -116,7 +116,7 @@ warn = err < Th_err;
 
 %save results
 if(save_results)
-    save(strcat('results/',datestr(clock)),'Pbit','SNR_dB','Npck','err','Nit','time','Max_npck','Th_err','rate','n');
+    save(strcat('results/',datestr(clock)),'Pbit','SNR_dB','Npck','err','Nit','time','Max_npck','Th_err','rate','n','Q');
 end
 
 if(false)
