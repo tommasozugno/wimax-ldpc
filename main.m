@@ -1,7 +1,7 @@
 clear all;
 close all;
 
-save_results = 0;
+save_results = 1;
 
 %********************
 %   rate 1 --> 1/2  *
@@ -25,8 +25,8 @@ M3 = double(M3.x);
 %Parameters  **************************************************************
 Nit = 50; %Number of iterations on the graph
 Max_npck = 1000; %Maximum number of packets
-Th_err = 100; %Error threshold
-SNR_dB = [13 15]; %SNR range in dB
+Th_err = 500; %Error threshold
+SNR_dB = [-1 0]; %SNR range in dB
 SNR = 10.^(SNR_dB/10); %Linear SNR range
 sigmaw = sqrt(1./SNR); %Noise variance range
 Q = 6; %Modulation order
@@ -78,7 +78,7 @@ for npck = 1 : Max_npck
                 if(Q > 1)
                     %QPSK, 16QAM, 64QAM
                     %Received vector
-                    r = c_mod + w*sigmaw(snr);
+                    r = c_mod + w*sigmaw(snr)/sqrt(2);
                     %Decoding
                     u_hat = decodeBICM(r, sigmaw(snr), H, k, Nit, Q, C, d);
                 else

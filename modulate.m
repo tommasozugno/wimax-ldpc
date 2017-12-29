@@ -6,7 +6,7 @@ function y = modulate(c, Q)
         for i = 1 : length(c)/Q
             tmp(i) = bi2de(c(Q*(i-1)+1:Q*i),'left-msb');
         end
-        y = qammod(tmp,2^Q,'UnitAveragePower',true)*sqrt(Q);
+        y = qammod(tmp,2^Q,'UnitAveragePower',true); %constellation energy 1
 
     end
     
