@@ -14,12 +14,14 @@
 \usepackage{tikz}
 \setbeamercovered{transparent} % \pause text visibility
 \usepackage{mathtools}
+\usepackage{xcolor}
 
 %------------------------------ TITLE PAGE DECLARATION
-\title[]{\textsc{Implementation and performance analysis of WiMAX 802.16 LDPC Code}}
-\subtitle[]{Channel Coding Final Project}
-\author[]{Tommaso Zugno}
-\date[]{15/12/2017}
+\title[]{\textsc{WiMAX IEEE 802.16 LDPC Code \\ Performance Evaluation}}
+\subtitle[]{\vspace{0.3cm} \textcolor{black!50}{Channel Coding Final Project}}
+\author[]{Tommaso Zugno \\ \href{mailto:tommasozugno@gmail.com}{ \textcolor{black!50}{\texttt{\footnotesize{tommasozugno@gmail.com}}}}
+}
+\date[]{12/01/2018}
 %\institute[]{Università degli Studi di Padova\\ Dipartimento di Ingegneria dell'Informazione}
 %\logo{\includegraphics[width=1cm]{figure1/logo_unipd}}
 %------------------------------ /TITLE PAGE DECLARATION
@@ -34,7 +36,15 @@
 \begin{frame}
 \transwipe[direction=0]
 \frametitle{Outline}
-
+\begin{enumerate}
+\item WiMAX Technology
+\item Channel coding in WirelessMAN-OFDMA PHY layer
+\item LDPC codes
+\item Encoding procedure and encoder implementation
+\item Decoding procedure and decoder implementation
+\item \texttt{main.m}
+\item Results
+\end{enumerate}
 \end{frame}
 
 
@@ -134,8 +144,8 @@ The permutations used are circular right shifts.
 \frametitle{LDPC codes}
 $H$ is expanded from a base model matrix $H_{bm}$ of size $m_b\times n_b$:
 \begin{itemize}
-\item each positive entry $p(i,j)$ is replaced with a $P_{i,j}$ matrix with circular shift size equal to $p(i,j)$
-\item each blank or negative entry p(i,j) is replaced with a $P_{i,j}$ zero matrix
+\item each positive entry $p(i,j)$ is replaced by a $P_{i,j}$ matrix with circular shift size equal to $p(i,j)$
+\item each blank or negative entry p(i,j) is replaced by a $P_{i,j}$ zero matrix
 \end{itemize}
 \vspace{0.3cm}
 The standard defines $H_{bm}$ for the largest codeword length ($n = 2304$) of each code rate. $H_{bm}$ for a different codeword length $n'$ is obtained by scaling the shift sizes proportionally
@@ -158,8 +168,8 @@ For an efficient encoding, H is divided into the form:
 \begin{equation*}
 H = 
 	\begin{bmatrix}
-		A & B & T \\
-		C & D & E \\
+		A_{\textcolor{black!40}{(m-z)\times Rn}} & B_{\textcolor{black!40}{(m-z)\times z}} & T_{\textcolor{black!40}{(m-z) \times (m-z)}} \\
+		C_{\textcolor{black!40}{z\times z}} &D_{\textcolor{black!40}{z \times k}} & E_{\textcolor{black!40}{z \times (m-z)}} \\
 	\end{bmatrix}
 \end{equation*}
 
@@ -278,6 +288,27 @@ The decoding is performed using the Message Passing Algorithm (MPA) in the logar
 
 \begin{frame}
 \transwipe[direction=0]
+\frametitle{Message Passing Algorithm}
+\textbf{Initialization:} Messages $\mu_{h \rightarrow f}$ are initialized with the channel a-priori knowledge $g$.
+
+\vspace{0.5cm}
+
+\textbf{Schedule:}
+\begin{enumerate}
+\item run message passing on check nodes
+\item run message passing on variable nodes
+\item perform ongoing marginalization:
+	\begin{equation*}
+		\hat c_l = \bigg \{ \begin{array}{rl} 0 & ,\mu_{h_l \rightarrow c_l} + \mu_{g_l \rightarrow c_l} \geq 0 \\ 1 & ,otherwise \end{array}
+	\end{equation*}
+\item go back to step 1 until the maximum number of iterations is reached or a codeword is found
+\end{enumerate} 
+
+\end{frame}
+
+
+\begin{frame}
+\transwipe[direction=0]
 %\frametitle{Leaf and variable nodes}
 
 \begin{block}{Leaf nodes}
@@ -369,26 +400,6 @@ The update rule for the check nodes is:
 
 \begin{frame}
 \transwipe[direction=0]
-\frametitle{Message Passing Algorithm}
-\textbf{Initialization:} Messages $\mu_{h \rightarrow f}$ are initialized with the channel a-priori knowledge $g_l$.
-
-\vspace{0.5cm}
-
-\textbf{Schedule:}
-\begin{enumerate}
-\item run message passing on check nodes
-\item run message passing on variable nodes
-\item perform ongoing marginalization:
-	\begin{equation*}
-		\hat c_l = \bigg \{ \begin{array}{rl} 0 & ,\mu_{h_l \rightarrow c_l} + \mu_{g_l \rightarrow c_l} \geq 0 \\ 1 & ,otherwise \end{array}
-	\end{equation*}
-\item go back to step 1 until the maximum number of iterations is reached or a codeword is found
-\end{enumerate} 
-
-\end{frame}
-
-\begin{frame}
-\transwipe[direction=0]
 \frametitle{Decoder implementation}
 The decoder is implemented by the function \texttt{decode2.m} which outputs the estimate $\mathbf{\widehat u}$ of the transmitted infoword $\mathbf u$, given the received vector $\mathbf r$ and the noise variance $\sigma_w^2$.
 
@@ -405,39 +416,109 @@ The decoder is implemented by the function \texttt{decode2.m} which outputs the 
 
 \end{frame}
 
+%\begin{frame}
+%\transwipe[direction=0]
+%\frametitle{Decoder implementation}
+%\texttt{decode2.m} implements the Message Passing schedule described above:
+
+%\vspace{0.3cm}
+
+%\textbf{Initialization:} compute \texttt{g} and initialize \texttt{mu\_hf}
+
+ %\textbf{while} max n of iterations is not reached AND codeword is not found
+%\begin{itemize}
+%\item update \texttt{mu\_fh}
+%	\begin{itemize}
+%		\item compute  $\tilde \phi$ (\texttt{mu\_hf}) and $sign$(\texttt{mu\_hf})
+%		\item sum the rows of $\tilde \phi$ (\texttt{mu\_hf}), multiply the rows of $sign$(\texttt{mu\_hf})
+%		\item for each outgoing branch, remove the contributes of the incoming message and compute \texttt{mu\_fh}
+%	\end{itemize}
+%\item update \texttt{mu\_hf} and \texttt{mu\_hg}
+%	\begin{itemize}
+%		\item sum the rows of \texttt{mu\_fh} and update \texttt{mu\_hg}
+%		\item add \texttt{g}, for each outgoing branch remove the contribute of the incoming message and update \texttt{mu\_hf}
+%	\end{itemize}
+%\item marginalize
+%\end{itemize}
+
+%\end{frame}
+
 \begin{frame}
 \transwipe[direction=0]
 \frametitle{Decoder implementation}
-\texttt{decode2.m} implements the Message Passing procedure described above:
+\texttt{decode2.m} implements the Message Passing schedule described above:
 
 \vspace{0.3cm}
 
-%\begin{itemize}
-
-%\item 
 \textbf{Initialization:} compute \texttt{g} and initialize \texttt{mu\_hf}
 
  \textbf{while} max n of iterations is not reached AND codeword is not found
 \begin{itemize}
-\item update \texttt{mu\_fh}
-	\begin{itemize}
-		\item compute  $\tilde \phi$ (\texttt{mu\_hf}) and $sign$(\texttt{mu\_hf})
-		\item sum the rows of $\tilde \phi$ (\texttt{mu\_hf}), multiply the rows of $sign$(\texttt{mu\_hf})
-		\item for each outgoing branch, remove the contributes of the incoming message and compute \texttt{mu\_fh}
-	\end{itemize}
-\item update \texttt{mu\_hf} and \texttt{mu\_hg}
-	\begin{itemize}
-		\item sum the rows of \texttt{mu\_fh} and update \texttt{mu\_hg}
-		\item add \texttt{g}, for each outgoing branch remove the contribute of the incoming message and update \texttt{mu\_hf}
-	\end{itemize}
-\item marginalize
+\item update \texttt{mu\_fh}\\
+		$\tilde \phi$ (|\texttt{mu\_hf}|) = 
+		$\begin{bmatrix}
+		\tilde \phi(|\mu_{h_1 \rightarrow f_1}|)  & \tilde \phi(|\mu_{h_1 \rightarrow f_2}|) & \dots & \tilde \phi(|\mu_{h_1 \rightarrow f_m}|)\\
+		\vdots & \vdots & & \vdots \\
+		\tilde \phi(|\mu_{h_n \rightarrow f_1}|)& \tilde \phi(|\mu_{h_n \rightarrow f_2}|) & \dots & \tilde \phi(|\mu_{h_n \rightarrow f_m}|)
+		\end{bmatrix}$\\
+		
+		\begin{equation*}
+		\texttt{tmp3} = \left( \begin{bmatrix} \sum_1^n\tilde \phi (|\mu_{h_i \rightarrow f_1}|) \\ \vdots \\ \sum_1^n\tilde \phi (|\mu_{h_i \rightarrow f_m}|) \end{bmatrix} \begin{bmatrix} 1&\dots&1 \end{bmatrix}\right) .*H - \tilde \phi (|\texttt{mu\_hf}|)^T
+		\end{equation*}
 \end{itemize}
-
 \end{frame}
 
 \begin{frame}
 \transwipe[direction=0]
 \frametitle{Decoder implementation}
+\begin{itemize}
+\item[]$sign$ (\texttt{mu\_hf}) = 
+		$\begin{bmatrix}
+		sign(\mu_{h_1 \rightarrow f_1})  & sign(\mu_{h_1 \rightarrow f_2}) & \dots & sign(\mu_{h_1 \rightarrow f_m})\\
+		\vdots & \vdots & & \vdots \\
+		sign(\mu_{h_n \rightarrow f_1})& sign(\mu_{h_n \rightarrow f_2}) & \dots & sign(\mu_{h_n \rightarrow f_m}) 
+		\end{bmatrix}$
+		
+		\begin{equation*}
+		 \texttt{mu\_fh}= \tilde \phi (\texttt{tmp3}).*\left( \begin{bmatrix} \prod_1^n sign (\mu_{h_i \rightarrow f_1}) \\ \vdots \\ \prod_1^n sign(\mu_{h_i \rightarrow f_m}) \end{bmatrix} \begin{bmatrix} 1&\dots&1 \end{bmatrix}\right) .* sign(\texttt{mu\_hf})^T
+		\end{equation*}
+		
+\end{itemize}
+		
+\end{frame}
+
+\begin{frame}
+\transwipe[direction=0]
+\frametitle{Decoder implementation}
+\begin{itemize}
+\item Update \texttt{mu\_hf} and {\texttt{mu\_hg}} 
+
+\begin{equation*}
+\texttt{mu\_hf} = \left[ \left(\begin{bmatrix} \sum_1^m \mu_{f_i \rightarrow h_1} \\ \vdots \\ \sum_1^m \mu_{f_i \rightarrow h_n} \end{bmatrix} + \texttt{g} \right) \begin{bmatrix} 1 & \dots & 1 \end{bmatrix} \right] .* H^T - \texttt{mu\_fh}^T
+\end{equation*}		
+
+\begin{equation*}
+\texttt{mu\_hg} = \begin{bmatrix} \sum_1^m \mu_{f_i \rightarrow h_1} & \sum_1^m \mu_{f_i \rightarrow h_2} & \dots & \sum_1^m \mu_{f_i \rightarrow h_n} \end{bmatrix} 
+\end{equation*}
+
+\vspace{0.3cm}
+
+\item marginalize
+\begin{equation*}
+		%\hat c_l = \bigg \{ \begin{array}{rl} 0 & ,\texttt{mu\_hg(l)} + \texttt{g(l)} \geq 0 \\ 1 & ,otherwise \end{array}
+		\hat c = (\texttt{mu\_hg}+\texttt{g})<0
+	\end{equation*}
+
+
+\end{itemize}
+
+		
+\end{frame}
+
+\begin{frame}
+\transwipe[direction=0]
+\frametitle{Decoder implementation}
+
 The $\tilde \phi$ function is truncated to avoid over/underflow errors:
 \begin{equation*}
 \tilde \phi (x) = \Bigg\{
@@ -469,6 +550,7 @@ The Message Passing schedule modifies into:
 		\item run message passing on the check nodes
 		\item update messages variable $\rightarrow$ conform
 		\item marginalize
+		\item go back to step 1 until the maximum number of iterations is reached or a codeword is found
 	\end{enumerate}
 \end{itemize}
 \end{frame}
@@ -516,9 +598,9 @@ The BICM decoder was implemented starting from \texttt{decode2.m}. The initializ
 \begin{frame}
 \transwipe[direction=0]
 \frametitle{main.m}
-The script \texttt{main.m} runs a simulation campaign to test the performance of a code in terms of $P_{bit}$ vs $E_b/N_0$.
+The script \texttt{main.m} runs a simulation campaign to test the performance of a code in terms of $P_{bit}$ vs $SNR$.
 
-For each $E_b/N_0$ value to test, the simulation follows this schedule:
+For each $SNR$ value to test, the simulation follows this schedule:
 %\begin{itemize}
 %\item \textbf{while} error threshold AND max num of packets are not reached
 	\begin{enumerate}
@@ -534,22 +616,22 @@ For each $E_b/N_0$ value to test, the simulation follows this schedule:
 
 \end{frame}
 
-\begin{frame}
-\transwipe[direction=0]
-\frametitle{main.m}
+%\begin{frame}
+%\transwipe[direction=0]
+%\frametitle{main.m}
 %\begin{itemize}
-Each bit of the infoword $\mathbf{u}$ is randomly generated using uniform probability distribution.
+%Each bit of the infoword $\mathbf{u}$ is randomly generated with uniform distribution.
 
-\vspace{0.5cm}
+%\vspace{0.5cm}
 
-The modulation is performed by the function \texttt{modulate.m}. It supports 4 different modulation schemes (BPSK, QPSK, 16-QAM, 64-QAM). All the schemes have unitary average constellation energy.
-A Gray coded bit-assignment is used.% in all the schemes. 
+%The modulation is performed by the function \texttt{modulate.m}. It supports 4 different modulation schemes (BPSK, QPSK, 16-QAM, 64-QAM). All the schemes have unitary average constellation energy.
+%A Gray coded bit-assignment is used.% in all the schemes. 
 
-\vspace{0.5cm}
+%\vspace{0.5cm}
 
-AWGN noise is generated with unitary variance and then scaled by $\sigma_w$. The noise variance is computed as $\sigma_w^2 = \frac{1}{\Gamma}$. %In the case of BICM, each noise component (real and complex) is scaled by $\frac{\sigma_w}{\sqrt{2}}$
+%AWGN noise is generated with unitary variance and then scaled by $\sigma_w$ (in the passband systems, each noise component is scaled by $\frac{\sigma_w}{\sqrt{2}}$ ). The noise variance is computed as $\sigma_w^2 = \frac{1}{\Gamma}$. %In the case of BICM, each noise component (real and complex) is scaled by $\frac{\sigma_w}{\sqrt{2}}$
 %\end{itemize}
-\end{frame}
+%\end{frame}
 
 \begin{frame}
 \transwipe[direction=0]
@@ -601,6 +683,9 @@ Performance of BICM - LDPC ($n = 576$, $R = 5/6$, $N_{it} = 50$) for different m
 \end{figure}
 \end{center}
 
+\end{frame}
+
+\begin{frame}
 \end{frame}
 
 
